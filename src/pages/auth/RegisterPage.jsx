@@ -10,8 +10,8 @@ import { db } from '../../../configs/auth'
 
 function RegisterPage() {
     const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
     async function handleRegister (e) {
@@ -21,10 +21,11 @@ function RegisterPage() {
         try {
             // display successfully registered value with swal
             const registeredUser = await createUserWithEmailAndPassword(auth, email, password);
+            console.log("registered user ", registeredUser)
             await setDoc(doc(db, 'users', registeredUser.user.uid), {
                 email: email,
                 name: fullName,
-                role: 'consumer',
+                role: 'buyers',
             })
             Swal.fire({
                 text: `${registeredUser.user.email} successfully registered`,
