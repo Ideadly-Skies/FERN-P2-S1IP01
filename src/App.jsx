@@ -100,7 +100,12 @@ const router = createBrowserRouter([
         index: true,
         path: "about",
         element: <AboutPublicPage />
-      }
+      },
+      // {
+      //   index: true,
+      //   path: "seed",
+      //   element: <DummySeeder/>
+      // }
     ],
   },
 ]);

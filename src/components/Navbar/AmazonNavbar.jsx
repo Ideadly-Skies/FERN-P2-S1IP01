@@ -2,17 +2,19 @@
 import { FaShoppingCart, FaSearch } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useState } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../../configs/auth";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
 
 // signOut from account
 import { signOut } from 'firebase/auth';
 
 export default function Navbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [user] = useAuthState(auth); // Firebase auth context
+    const { user, name } = useContext(AuthContext);
+    console.log("user derived: ", user) 
     const navigate = useNavigate();
 
     async function handlelogout() {
@@ -53,7 +55,7 @@ export default function Navbar() {
         >
             {user ? (
                 <>
-                <span className="text-gray-300">Deliver to {user.displayName || "You"}</span>
+                <span className="text-gray-300">Deliver to {name || "You"}</span>
                 <span className="font-bold">Chatswood 2067</span> {/* or dynamically pull location */}
                 </>
             ) : (
@@ -92,7 +94,7 @@ export default function Navbar() {
             onMouseEnter={() => setIsDropdownOpen(true)}
             onMouseLeave={() => setIsDropdownOpen(false)}
         >
-            <span>{user ? `Hello, ${user.displayName || ""}` : "Hello, sign in"}</span>
+            <span>{user ? `Hello, ${name || ""}` : "Hello, sign in"}</span>
             <span className="font-bold flex items-center">
                 Account & Lists <IoMdArrowDropdown />
             </span>
