@@ -22,26 +22,30 @@ import AuthContextProvider from './contexts/AuthContext';
 
 function BuyersProtectedPage({children}){
   const { user, role } = useContext(AuthContext);
+  console.log(`user and role from buyers protected page: ${user} ${role}`);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // transport to public page
+    // Prevent navigation until user context is ready
+    if (user === undefined || role === undefined) return;
+
+    // transport into public page
     if (!user || role !== "buyers") {
       navigate("/public", {
         state: history.state,
         replace: true,
-      }); 
+      });
     }
-
-    // transport to buyers home page
-    if (user && role === "buyers") {
+    
+    // transport to buyers home page 
+    else {
       navigate("/", {
         state: history.state,
         replace: true,
       });
     }
-  }, [user, role, navigate]);
 
+  }, [user, role, navigate]);
 
   console.log("you are protected"); 
   return children;

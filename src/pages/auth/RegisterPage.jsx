@@ -1,121 +1,155 @@
-import { React, useState } from 'react'
-import { useNavigate } from 'react-router'
-
-// to persist changes in db
-import { auth } from '../../../configs/auth'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-import Swal from 'sweetalert2'
-import { setDoc, doc } from 'firebase/firestore'
-import { db } from '../../../configs/auth'
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { setDoc, doc } from "firebase/firestore";
+import { auth, db } from "../../../configs/auth";
+import Swal from "sweetalert2";
 
 function RegisterPage() {
-    const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const navigate = useNavigate();
+  const location = useLocation();
+  const prefillEmail = location.state?.prefillEmail || "";
 
-    async function handleRegister (e) {
-        e.preventDefault()
-        // console.log("submitted value: ", {email, password})
-        
-        try {
-            // display successfully registered value with swal
-            const registeredUser = await createUserWithEmailAndPassword(auth, email, password);
-            console.log("registered user ", registeredUser)
-            await setDoc(doc(db, 'users', registeredUser.user.uid), {
-                email: email,
-                name: fullName,
-                role: 'buyers',
-            })
-            Swal.fire({
-                text: `${registeredUser.user.email} successfully registered`,
-                icon: "success"
-            });
-            navigate("/")  
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState(prefillEmail);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
 
-        } catch (error){
-            // display error with swal
-            Swal.fire({
-                text: error,
-            });
-        }
+  async function handleRegister(e) {
+    e.preventDefault();
+
+    if (password.length < 6) {
+      return Swal.fire({
+        text: "Password must be at least 6 characters.",
+        icon: "error",
+      });
     }
 
-    return (
-        <>
-            <div className="p-10">
-                <h1 className="mb-8 font-extrabold text-4xl">Register</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    if (password !== confirmPassword) {
+      return Swal.fire({
+        text: "Passwords do not match.",
+        icon: "error",
+      });
+    }
 
-                    <form onSubmit={handleRegister}>
-                        <div className="mt-4">
-                            <label className="block font-semibold" htmlFor="fullName">Full Name</label>
-                            <input
-                                value={fullName}
-                                onChange={(e) => setFullName(e.target.value)}
-                                className="w-full shadow-inner bg-gray-100 rounded-lg placeholder-black text-2xl p-4 border-none mt-1"
-                                id="fullName"
-                                type="text"
-                                name="fullName"
-                                required
-                            />
-                        </div>
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-                        <div className="mt-4">
-                            <label className="block font-semibold" htmlFor="email">Email</label>
-                            <input
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full shadow-inner bg-gray-100 rounded-lg placeholder-black text-2xl p-4 border-none mt-1"
-                                id="email"
-                                type="email"
-                                name="email"
-                                required
-                            />
-                        </div>
+      await setDoc(doc(db, "users", user.uid), {
+        email: email,
+        name: fullName,
+        role: "buyers",
+      });
 
-                        <div className="mt-4">
-                            <label className="block font-semibold" htmlFor="password">Password</label>
-                            <input
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full shadow-inner bg-gray-100 rounded-lg placeholder-black text-2xl p-4 border-none mt-1"
-                                id="password"
-                                type="password"
-                                name="password"
-                                required
-                                autoComplete="new-password"
-                            />
-                        </div>
+      Swal.fire({
+        text: `${user.email} successfully registered!`,
+        icon: "success",
+      });
+      navigate("/");
+    } catch (error) {
+      Swal.fire({
+        text: error.message,
+        icon: "error",
+      });
+    }
+  }
 
-                        <div className="flex items-center justify-between mt-8">
-                            <button
-                                type="submit"
-                                className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
-                            >
-                                Register
-                            </button>
-                            <a className="font-semibold cursor-pointer" onClick={() => navigate("/auth/login")}>
-                                Already registered?
-                            </a>
-                        </div>
-                    </form>
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="w-full max-w-md border border-gray-300 p-6 rounded-md shadow-sm">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg"
+          alt="Amazon Logo"
+          className="mx-auto mb-6 h-6"
+        />
+        <h1 className="text-xl font-semibold mb-4">Create account</h1>
 
-                    <aside>
-                        <div className="bg-gray-100 p-8 rounded">
-                            <h2 className="font-bold text-2xl">Instructions</h2>
-                            <ul className="list-disc mt-4 list-inside">
-                                <li>All users must provide a valid email address and password to create an account.</li>
-                                <li>Users must not use offensive, vulgar, or otherwise inappropriate language in their username or profile information.</li>
-                                <li>Users must not create multiple accounts for the same person.</li>
-                            </ul>
-                        </div>
-                    </aside>
+        <form onSubmit={handleRegister}>
+          <label htmlFor="fullName" className="text-sm font-bold">
+            Your name
+          </label>
+          <input
+            id="fullName"
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="w-full mt-1 mb-4 border border-gray-400 rounded-sm px-2 py-2 focus:outline-none focus:ring-yellow-500 focus:ring-2"
+            required
+          />
 
-                </div>
-            </div>
-        </> 
-    )
+          <label htmlFor="email" className="text-sm font-bold">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full mt-1 mb-4 border border-gray-400 rounded-sm px-2 py-2 focus:outline-none focus:ring-yellow-500 focus:ring-2"
+            required
+          />
+
+          <label htmlFor="password" className="text-sm font-bold">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 6 characters"
+            className="w-full mt-1 mb-1 border border-gray-400 rounded-sm px-2 py-2 focus:outline-none focus:ring-yellow-500 focus:ring-2"
+            required
+          />
+          <p className="text-xs text-gray-600 mb-3 pl-1">
+            <span className="text-blue-600">i</span> Passwords must be at least 6 characters.
+          </p>
+
+          <label htmlFor="confirmPassword" className="text-sm font-bold">
+            Re-enter password
+          </label>
+          <input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full mt-1 mb-4 border border-gray-400 rounded-sm px-2 py-2 focus:outline-none focus:ring-yellow-500 focus:ring-2"
+            required
+          />
+
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-b from-yellow-300 to-yellow-500 border border-yellow-700 hover:from-yellow-400 text-sm font-medium py-2 rounded-sm"
+          >
+            Create your Amazon account
+          </button>
+        </form>
+
+        <p className="text-xs text-gray-600 mt-4">
+          By creating an account, you agree to Amazon’s{" "}
+          <a href="#" className="text-blue-600 hover:underline">
+            Conditions of Use
+          </a>{" "}
+          and{" "}
+          <a href="#" className="text-blue-600 hover:underline">
+            Privacy Notice
+          </a>
+          .
+        </p>
+
+        <div className="mt-6 text-sm">
+          Already have an account?{" "}
+          <span
+            className="text-blue-600 hover:underline cursor-pointer"
+            onClick={() => navigate("/auth/login")}
+          >
+            Sign-in
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default RegisterPage
+export default RegisterPage;

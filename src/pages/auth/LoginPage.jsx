@@ -1,106 +1,177 @@
-import React from 'react'
-import { useState } from 'react'
-import { useNavigate } from 'react-router'
-import Swal from 'sweetalert2'
-
-// to extract data from firebase
-import { auth, googleProvider } from '../../../configs/auth'
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
+import { auth } from "../../../configs/auth";
+import { db } from "../../../configs/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 function LoginPage() {
-    const [email, setEmail] = useState("") 
-    const [password, setPassword] = useState("")
-    const navigate = useNavigate()
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [step, setStep] = useState(1);
+    const navigate = useNavigate();
 
-    async function handleLogin(e) {
-        e.preventDefault()
-        
-        try {
-            const userLoggedIn = await signInWithEmailAndPassword(auth, email, password);
-            Swal.fire({
-                text: `${userLoggedIn.user.email} successfully logged-in!`,
-                icon: "success"
-            });
-            navigate("/")
+    async function handleEmailSubmit(e) {
+        e.preventDefault();
 
-        } catch (error) {
-            // display error with swal
-            Swal.fire({
-                text: error,
+        const normalizedEmail = email.trim().toLowerCase();
+
+        if (!normalizedEmail) {
+            return Swal.fire({
+                text: "Please enter a valid email or phone number.",
+                icon: "error",
             });
         }
-    } 
 
-    async function handleGoogleSignIn() {
         try {
-            const result = await signInWithPopup(auth, googleProvider);
-            const user = result.user;
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("email", "==", normalizedEmail));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                Swal.fire({
+                    text: "This email is not registered. Redirecting to registration page...",
+                    icon: "info",
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+                setTimeout(() => {
+                    navigate("/auth/register", { state: { prefillEmail: normalizedEmail } });
+                }, 2000);
+            } else {
+                setEmail(normalizedEmail);
+                setStep(2);
+            }
+        } 
+        catch (err) {
+            console.error("Error checking email in Firestore:", err);
             Swal.fire({
-                text: `${user.email} successfully signed in with Google!`,
-                icon: "success"
-            });
-            navigate("/");
-        } catch (error) {
-            console.log(error)
-            Swal.fire({
-                text: error.message,
-                icon: "error"
+                text: "Error checking email. Please try again.",
+                icon: "error",
             });
         }
     }
 
-    return (
-        <>
-            <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-                <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                    <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" className="mx-auto h-10 w-auto" />
-                    <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h2>
-                </div>
+  async function handlePasswordSubmit(e) {
+    e.preventDefault();
+    try {
+      const user = await signInWithEmailAndPassword(auth, email, password);
+      Swal.fire({
+        text: `${user.user.email} successfully logged in!`,
+        icon: "success",
+      });
+      navigate("/");
+    } catch (err) {
+      Swal.fire({ text: err.message, icon: "error" });
+    }
+  }
 
-                <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form onSubmit={handleLogin} className="space-y-6">
-                        <div>
-                            <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">Email address</label>
-                            <div className="mt-2">
-                            <input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" name="email" required autoComplete="email" className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-                            </div>
-                        </div>
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="w-full max-w-md border border-gray-300 p-6 rounded-md shadow-sm">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg"
+          alt="Amazon Logo"
+          className="mx-auto mb-6 h-6"
+        />
 
-                        <div>
-                            <div className="flex items-center justify-between">
-                            <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">Password</label>
-                            <div className="text-sm">
-                                <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">Forgot password?</a>
-                            </div>
-                            </div>
-                            <div className="mt-2">
-                            <input value={password} onChange={(e) => setPassword(e.target.value)} id="password" type="password" name="password" required autoComplete="current-password" className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-                            </div>
-                        </div>
+        {/* Step 1: Email input */}
+        {step === 1 && (
+          <>
+            <h1 className="text-xl font-medium mb-4">Sign in or create account</h1>
+            <form onSubmit={handleEmailSubmit}>
+              <label htmlFor="email" className="text-sm font-bold">
+                Enter mobile number or email
+              </label>
+              <input
+                id="email"
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full mt-1 mb-4 border border-gray-400 rounded-sm px-2 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                required
+              />
+              <button
+                type="submit"
+                className="w-full bg-yellow-400 hover:bg-yellow-300 text-sm font-medium py-2 rounded-sm"
+              >
+                Continue
+              </button>
+            </form>
+          </>
+        )}
 
-                        <div>
-                            <button type="submit" className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign in</button>
-                        </div>
-                    </form>
-
-                    <p className="mt-10 mx-3 text-center text-sm/6 text-gray-500">
-                        Not a member?
-                        <a onClick={() => {navigate("/auth/register")}} className="font-semibold text-indigo-600 hover:text-indigo-500">Register Now</a>
-                    </p>
-
-                    <div className="mt-4">
-                        <button
-                            onClick={handleGoogleSignIn}
-                            type="button"
-                            className="flex w-full justify-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm/6 font-semibold text-gray-700 shadow-sm hover:bg-gray-50"
-                        >
-                            Sign in with Google
-                        </button>
-                    </div>
-                </div>
+        {/* Step 2: Password input */}
+        {step === 2 && (
+          <>
+            <h1 className="text-xl font-medium mb-2">Sign in</h1>
+            <div className="text-sm text-gray-700 mb-2">
+              {email}{" "}
+              <button
+                className="text-blue-600 hover:underline ml-1"
+                onClick={() => setStep(1)}
+              >
+                Change
+              </button>
             </div>
-        </>
-    )
+            <form onSubmit={handlePasswordSubmit}>
+              <div className="flex justify-between items-center">
+                <label htmlFor="password" className="text-sm font-bold">
+                  Password
+                </label>
+                <a href="#" className="text-sm text-blue-600 hover:underline">
+                  Forgot password?
+                </a>
+              </div>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full mt-1 mb-4 border border-gray-400 rounded-sm px-2 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                required
+              />
+              <button
+                type="submit"
+                className="w-full bg-yellow-400 hover:bg-yellow-300 text-sm font-medium py-2 rounded-sm"
+              >
+                Sign-In
+              </button>
+            </form>
+          </>
+        )}
+
+        <p className="text-xs text-gray-600 mt-4">
+          By continuing, you agree to Amazon's{" "}
+          <a href="#" className="text-blue-600 hover:underline">
+            Conditions of Use
+          </a>{" "}
+          and{" "}
+          <a href="#" className="text-blue-600 hover:underline">
+            Privacy Notice
+          </a>
+          .
+        </p>
+
+        <div className="mt-4 text-sm">
+          <a href="#" className="text-blue-600 hover:underline">
+            Need help?
+          </a>
+        </div>
+
+        <hr className="my-4" />
+
+        <div className="text-sm">
+          <span className="font-bold">Buying for work?</span>
+          <br />
+          <a href="#" className="text-blue-600 hover:underline">
+            Create a free business account
+          </a>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default LoginPage
+export default LoginPage;
