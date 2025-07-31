@@ -10,6 +10,9 @@ import RegisterPage from './pages/auth/RegisterPage';
 // buyers page
 import BuyersHomePage from './pages/buyers/BuyersHomePage';
 
+// seed page
+import DummySeeder from './pages/seed/DummySeeder';
+
 // layouts
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/AdminLayout';
