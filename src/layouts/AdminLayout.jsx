@@ -31,8 +31,7 @@ function AdminLayout() {
 
     return (
         <>
-            <div>-- Admin Layout --</div>  
-            <Outlet/> 
+            <Outlet/>
         </>
     )
 }
