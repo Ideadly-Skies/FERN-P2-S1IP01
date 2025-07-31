@@ -10,6 +10,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 
 // signOut from account
 import { signOut } from 'firebase/auth';
+import SearchBar from "./SearchBar";
 
 export default function Navbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -67,21 +68,29 @@ export default function Navbar() {
         </div>
 
         {/* Search */}
-        <div className="flex flex-1 mx-4">
-            <select className="text-black text-sm px-2 rounded-l-md bg-gray-200 border border-r-0">
-            <option value="all">All</option>
+        {/* <div className="flex flex-1 mx-4">
+            <select
+                className="text-black text-sm px-2 rounded-l-md bg-gray-200 border border-r-0"
+                style={{ width: "60px", minWidth: "50px", maxWidth: "120px" }}
+            >
+                <option value="all">All</option>
+                {categories.map((category) => (
+                    <option key={category} value={category}>
+                        {category}
+                    </option>
+                ))} 
             </select>
             <input
-            type="text"
-            placeholder="Search Amazon.com.au"
-            className="w-full px-2 py-2 bg-white text-black"
+                type="text"
+                placeholder="Search Amazon.com.au"
+                className="w-full px-2 py-2 bg-white text-black"
             />
             <button className="bg-[#febd69] px-4 py-2 rounded-r-md text-black">
-            <FaSearch />
+                <FaSearch />
             </button>
-        </div>
+        </div> */}
+        <SearchBar/>    
 
-        {/* Language */}
         <div className="hidden md:flex items-center text-sm mr-4 cursor-pointer">
             <img src="https://flagcdn.com/au.svg" alt="flag" className="w-5 h-5 mr-1" />
             <span>EN</span>
