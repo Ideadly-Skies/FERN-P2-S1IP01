@@ -1,10 +1,14 @@
 import { Outlet } from "react-router"
 
+import AmazonNavbar from "../components/Navbar/AmazonNavbar"
+import AmazonFooter from "../components/Footer/AmazonFooter"
+
 function PublicLayout() {
     return (
         <>
-            <div>-- Main Layout --</div>        
+            <AmazonNavbar/> 
             <Outlet/>  
+            <AmazonFooter/>
         </>
     )
 }

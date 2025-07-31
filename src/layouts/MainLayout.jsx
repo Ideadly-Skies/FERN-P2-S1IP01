@@ -5,6 +5,9 @@ import { useNavigate } from 'react-router'
 import Swal from "sweetalert2"
 import { auth } from "../../configs/auth"
 
+import AmazonFooter from "../components/Footer/AmazonFooter"
+import AmazonNavbar from "../components/Navbar/AmazonNavbar"
+
 function MainLayout() {
     const navigate = useNavigate()
     
@@ -23,8 +26,9 @@ function MainLayout() {
     
     return (
         <>
-            <div>-- Main Layout --</div>        
+            <AmazonNavbar/>
             <Outlet/>  
+            <AmazonFooter/>
         </>
     )
 }
