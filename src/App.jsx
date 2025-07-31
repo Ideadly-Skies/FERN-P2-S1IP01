@@ -22,7 +22,6 @@ import AuthContextProvider from './contexts/AuthContext';
 
 function BuyersProtectedPage({children}){
   const { user, role } = useContext(AuthContext);
-  console.log(`user and role from buyers protected page: ${user} ${role}`);
   const navigate = useNavigate();
 
   useEffect(() => {

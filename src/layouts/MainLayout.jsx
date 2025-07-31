@@ -19,7 +19,6 @@ function MainLayout() {
                 navigate("/public") 
             }
         });
-
     }, []) 
     
     return (
