@@ -10,7 +10,7 @@ export default function SearchBar() {
   const measureRef = useRef(null);
   const [selectWidth, setSelectWidth] = useState(60); // default to "All"
 
-  // 🔥 Fetch categories from Firestore
+  // Fetch categories from Firestore
   useEffect(() => {
     async function fetchCategories() {
       try {
@@ -28,11 +28,11 @@ export default function SearchBar() {
     fetchCategories();
   }, []);
 
-  // 🔄 Adjust dropdown width on selectedCategory change
+  // Adjust dropdown width on selectedCategory change
   useEffect(() => {
     if (measureRef.current) {
       const width = measureRef.current.offsetWidth;
-      setSelectWidth(width + 20); // Add buffer
+      setSelectWidth(width + 20);
     }
   }, [selectedCategory]);
 

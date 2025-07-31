@@ -93,7 +93,11 @@ const router = createBrowserRouter([
   //  public page
   {
     path: "/public",
-    element: <PublicLayout />, 
+    element: (
+      <BuyersProtectedPage>
+        <PublicLayout/>
+      </BuyersProtectedPage>
+    ),  
     children: [
       {
         index: true,
