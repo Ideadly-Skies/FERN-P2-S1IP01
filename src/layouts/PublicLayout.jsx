@@ -6,11 +6,12 @@ import { useState } from "react"
 
 function PublicLayout() {
     const [selectedCategory, setSelectedCategory] = useState("all")
+    const [searchTerm, setSearchTerm] = useState("");
 
     return (
         <>
-            <AmazonNavbar onCategoryChange={setSelectedCategory}/> 
-            <Outlet context={{selectedCategory}}/>  
+            <AmazonNavbar onCategoryChange={setSelectedCategory} onSearchChange={setSearchTerm}/> 
+            <Outlet context={{selectedCategory, searchTerm}}/>  
             <AmazonFooter/>
         </>
     )

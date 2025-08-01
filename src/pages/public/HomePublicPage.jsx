@@ -5,34 +5,36 @@ import { useOutletContext } from 'react-router';
 import { where, query } from 'firebase/firestore';
 
 function HomePublicPage() {
-  const { selectedCategory } = useOutletContext()
+  const { selectedCategory, searchTerm } = useOutletContext()
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchFilteredProducts() {
       try {
         let q = collection(db, "products");
 
-        if (selectedCategory && selectedCategory !== "all") {
+        // category filter
+        if (selectedCategory !== "all") {
           q = query(q, where("category", "==", selectedCategory));
         }
 
         const snapshot = await getDocs(q);
-        const results = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        const filtered = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(p =>
+            p.name.toLowerCase().includes(searchTerm.toLowerCase())
+          );
 
-        setProducts(results);
+        setProducts(filtered);
       } catch (err) {
-        console.error("Error fetching filtered products:", err);
+        console.error("Failed to fetch products:", err);
       }
     }
 
-    fetchProducts();
-  }, [selectedCategory]);
+    fetchFilteredProducts();
+  }, [selectedCategory, searchTerm]);
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
