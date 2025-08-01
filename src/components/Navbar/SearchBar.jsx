@@ -11,7 +11,7 @@ export default function SearchBar({ onCategoryChange, onSearchChange }) {
     const measureRef = useRef(null);
     const [selectWidth, setSelectWidth] = useState(60);
 
-    // debounce timer   
+    // debounce timer
     const debounceRef = useRef(null);
 
     useEffect(() => {
@@ -55,7 +55,7 @@ export default function SearchBar({ onCategoryChange, onSearchChange }) {
 
     function handleSearchButtonClick() {
         if (onSearchChange) {
-        onSearchChange(searchTerm);
+            onSearchChange(searchTerm);
         }
     }
 
