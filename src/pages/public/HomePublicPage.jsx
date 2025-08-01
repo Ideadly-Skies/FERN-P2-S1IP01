@@ -4,7 +4,7 @@ import { db } from '../../../configs/auth';
 import { useOutletContext } from 'react-router';
 
 function HomePublicPage() {
-  const { selectedCategory, searchTerm } = useOutletContext()
+  const { selectedCategory, searchTerm } = useOutletContext();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -12,7 +12,7 @@ function HomePublicPage() {
 
   useEffect(() => {
     async function fetchFilteredProducts() {
-      setLoading(true); 
+      setLoading(true);
 
       try {
         let q = collection(db, "products");
@@ -29,24 +29,21 @@ function HomePublicPage() {
           );
 
         setProducts(filtered);
+        setCurrentPage(1); // reset to first page on new filter/search
       } catch (err) {
         console.error("Failed to fetch products:", err);
       } finally {
-        setLoading(false); // stop loading
+        setLoading(false);
       }
     }
 
     fetchFilteredProducts();
   }, [selectedCategory, searchTerm]);
 
+  const totalPages = Math.ceil(products.length / productsPerPage);
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
-  const totalPages = Math.ceil(products.length / productsPerPage);
-
-  function paginate(pageNumber) {
-    setCurrentPage(pageNumber);
-  }
 
   return (
     <div className="bg-[#f5f7fa] py-10 px-5 min-h-screen">
@@ -74,49 +71,29 @@ function HomePublicPage() {
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-center mt-10 space-x-2 items-center">
-            <button
-              onClick={() => paginate(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              &lt; Previous
-            </button>
+          {products.length > productsPerPage && (
+            <div className="flex justify-center mt-10 items-center gap-6">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-white border rounded disabled:opacity-50"
+              >
+                &larr; Previous
+              </button>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number, idx) => {
-              if (
-                number === 1 ||
-                number === totalPages ||
-                Math.abs(currentPage - number) <= 1
-              ) {
-                return (
-                  <button
-                    key={number}
-                    onClick={() => paginate(number)}
-                    className={`px-3 py-1 border rounded ${
-                      currentPage === number ? 'border-black font-bold' : ''
-                    }`}
-                  >
-                    {number}
-                  </button>
-                );
-              } else if (
-                number === currentPage - 2 ||
-                number === currentPage + 2
-              ) {
-                return <span key={idx}>...</span>;
-              }
-              return null;
-            })}
+              <span className="text-sm text-gray-700 font-medium">
+                Page {currentPage} of {totalPages}
+              </span>
 
-            <button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              Next &gt;
-            </button>
-          </div>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-white border rounded disabled:opacity-50"
+              >
+                Next &rarr;
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
