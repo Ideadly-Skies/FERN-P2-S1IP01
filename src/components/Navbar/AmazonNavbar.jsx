@@ -11,13 +11,12 @@ import AccountDropdown from "./AccountDropdown";
 
 export default function Navbar({ onCategoryChange, onSearchChange }) {
     const { user, name } = useContext(AuthContext);
-    console.log("user derived: ", user) 
     const navigate = useNavigate();
 
     return (
         <header className="bg-[#131921] text-white flex items-center justify-between px-4 py-2 relative">
             {/* Logo */}
-            <div className="flex items-center px-2 py-1 bg-[#131921]">
+            <div className="flex items-center px-2 py-1 bg-[#131921]" onClick={() => {user? navigate("/") : navigate("/public")}}>
                 <img
                     src="https://wallpapers.com/images/high/amazon-logo-black-background-xb9pdemosnjfz9ej.png"
                     alt="Amazon Logo"
@@ -28,7 +27,7 @@ export default function Navbar({ onCategoryChange, onSearchChange }) {
 
             {/* Location */}
             <div
-                className="hidden md:flex flex-col text-xs ml-4 leading-tight cursor-pointer"
+                className="hidden md:flex flex-col text-xs ml-4 leading-tight cursor-pointer focus:outline-none focus:ring-2 focus:ring-white"
                 onClick={() => {
                     if (!user){ 
                         navigate("/auth/login");

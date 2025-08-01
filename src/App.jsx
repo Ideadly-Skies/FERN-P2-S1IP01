@@ -6,6 +6,7 @@ import AboutPublicPage from './pages/public/AboutPublicPage';
 import HomePublicPage from './pages/public/HomePublicPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ProductDetail from './pages/public/ProductDetailPage';
 
 // buyers page
 import BuyersHomePage from './pages/buyers/BuyersHomePage';
@@ -107,6 +108,11 @@ const router = createBrowserRouter([
         index: true,
         path: "about",
         element: <AboutPublicPage />
+      },
+      {
+        index: true,
+        path: "product/:slug",
+        element: <ProductDetail/>
       },
       // {
       //   index: true,
