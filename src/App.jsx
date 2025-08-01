@@ -6,9 +6,13 @@ import AboutPublicPage from './pages/public/AboutPublicPage';
 import HomePublicPage from './pages/public/HomePublicPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ProductDetail from './pages/public/ProductDetailPage';
 
 // buyers page
 import BuyersHomePage from './pages/buyers/BuyersHomePage';
+
+// seed page
+import DummySeeder from './pages/seed/DummySeeder';
 
 // layouts
 import MainLayout from './layouts/MainLayout';
@@ -22,7 +26,6 @@ import AuthContextProvider from './contexts/AuthContext';
 
 function BuyersProtectedPage({children}){
   const { user, role } = useContext(AuthContext);
-  console.log(`user and role from buyers protected page: ${user} ${role}`);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,7 +68,12 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <BuyersHomePage/>   
-      }
+      },
+      {
+        index: true,
+        path: "product/:slug",
+        element: <ProductDetail/>
+      }, 
     ],
   },
 
@@ -91,7 +99,11 @@ const router = createBrowserRouter([
   //  public page
   {
     path: "/public",
-    element: <PublicLayout />, 
+    element: (
+      <BuyersProtectedPage>
+        <PublicLayout/>
+      </BuyersProtectedPage>
+    ),  
     children: [
       {
         index: true,
@@ -101,7 +113,17 @@ const router = createBrowserRouter([
         index: true,
         path: "about",
         element: <AboutPublicPage />
-      }
+      },
+      {
+        index: true,
+        path: "product/:slug",
+        element: <ProductDetail/>
+      },
+      // {
+      //   index: true,
+      //   path: "seed",
+      //   element: <DummySeeder/>
+      // }
     ],
   },
 ]);

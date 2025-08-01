@@ -8,6 +8,7 @@ import Swal from "sweetalert2"
 import { auth } from "../../configs/auth"
 // import { useContext } from "react"
 // import { AuthContext } from "../contexts/AuthContext"
+import AmazonFooter from "../components/Footer/AmazonFooter"
 
 function AdminLayout() {
     const navigate = useNavigate()
@@ -32,6 +33,7 @@ function AdminLayout() {
     return (
         <>
             <Outlet/>
+            <AmazonFooter/>
         </>
     )
 }
