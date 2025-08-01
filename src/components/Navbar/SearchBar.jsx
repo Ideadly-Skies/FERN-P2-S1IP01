@@ -3,7 +3,7 @@ import { FaSearch } from "react-icons/fa";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../configs/auth";
 
-export default function SearchBar() {
+export default function SearchBar({ onCategoryChange }) {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const selectRef = useRef(null);
@@ -30,11 +30,15 @@ export default function SearchBar() {
 
   // Adjust dropdown width on selectedCategory change
   useEffect(() => {
+    if (onCategoryChange){
+        onCategoryChange(selectedCategory)
+    }
+
     if (measureRef.current) {
       const width = measureRef.current.offsetWidth;
       setSelectWidth(width + 20);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, onCategoryChange]);
 
   return (
     <div className="flex flex-1 mx-4 h-10 items-center">

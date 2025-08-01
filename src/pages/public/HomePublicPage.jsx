@@ -1,23 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../configs/auth';
+import { useOutletContext } from 'react-router';
+import { where, query } from 'firebase/firestore';
 
 function HomePublicPage() {
+  const { selectedCategory } = useOutletContext()
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
   useEffect(() => {
     async function fetchProducts() {
-      const querySnapshot = await getDocs(collection(db, 'products'));
-      const fetchedProducts = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setProducts(fetchedProducts);
+      try {
+        let q = collection(db, "products");
+
+        if (selectedCategory && selectedCategory !== "all") {
+          q = query(q, where("category", "==", selectedCategory));
+        }
+
+        const snapshot = await getDocs(q);
+        const results = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        setProducts(results);
+      } catch (err) {
+        console.error("Error fetching filtered products:", err);
+      }
     }
+
     fetchProducts();
-  }, []);
+  }, [selectedCategory]);
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
