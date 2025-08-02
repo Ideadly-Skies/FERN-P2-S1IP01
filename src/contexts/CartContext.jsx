@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useReducer, useEffect } from "react";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "../../configs/auth";
+import { AuthContext } from "../contexts/AuthContext";
 
 const CartContext = createContext();
 
@@ -37,13 +40,41 @@ export const cartReducer = (state, action) => {
     case "CLEAR_CART":
       return [];
 
+    case "SET_CART":
+      return action.payload;
+
     default:
       return state;
   }
 };
 
 export const CartProvider = ({ children }) => {
+  const { user } = useContext(AuthContext);
   const [cart, dispatch] = useReducer(cartReducer, []);
+
+  useEffect(() => {
+    if (user?.uid) {
+      const fetchCart = async () => {
+        const cartRef = doc(db, "users", user.uid);
+        const snap = await getDoc(cartRef);
+        if (snap.exists() && snap.data().cart) {
+          const savedCart = snap.data().cart;
+          dispatch({ type: "SET_CART", payload: savedCart });
+        }
+      };
+      fetchCart();
+    }
+  }, [user?.uid]);
+
+  useEffect(() => {
+    const saveCart = async () => {
+      if (!user?.uid || cart.length === 0) return;
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, { cart }, { merge: true });
+    };
+    saveCart();
+  }, [cart, user?.uid]);
+
   return (
     <CartContext.Provider value={{ cart, dispatch }}>
       {children}

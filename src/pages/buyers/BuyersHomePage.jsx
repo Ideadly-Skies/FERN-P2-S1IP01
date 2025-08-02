@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../../configs/auth';
 import { useNavigate } from 'react-router-dom';
+import { useOutletContext } from 'react-router';
 
 function BuyersHomePage() {
+  const { selectedCategory, searchTerm } = useOutletContext();
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [generalProducts, setGeneralProducts] = useState([]);
   const [loadedImages, setLoadedImages] = useState({});
@@ -19,36 +21,50 @@ function BuyersHomePage() {
   const recommendedPerPage = 4;
   const navigate = useNavigate();
 
-  const cartCategory = "laptops"; // placeholder; eventually pull this from Firebase cart data
+  const cartCategory = "";
 
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
       try {
-        const cartQuery = query(collection(db, 'products'), where('category', '==', cartCategory));
-        const cartSnap = await getDocs(cartQuery);
-        const recommended = cartSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setRecommendedProducts(recommended);
+          // Fetch recommended (category === "")
+          const cartQuery = query(collection(db, 'products'), where('category', '==', cartCategory));
+          const cartSnap = await getDocs(cartQuery);
+          const recommended = cartSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setRecommendedProducts(recommended);
 
-        const generalSnap = await getDocs(collection(db, 'products'));
-        const general = generalSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          // Build general query based on selectedCategory
+          let generalQuery = collection(db, 'products');
+          if (selectedCategory && selectedCategory !== "all") {
+            generalQuery = query(generalQuery, where('category', '==', selectedCategory));
+          }
 
-        const recommendedIds = new Set(recommended.map(p => p.id));
-        const generalFiltered = general.filter(p => !recommendedIds.has(p.id));
-        setGeneralProducts(generalFiltered);
+          const generalSnap = await getDocs(generalQuery);
+          let general = generalSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        setCurrentRecommendedPage(1);
-        setCurrentGeneralPage(1);
+          // Apply search term filtering
+          if (searchTerm.trim() !== "") {
+            general = general.filter(product =>
+              product.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          }
 
+          // Remove recommended from general
+          const recommendedIds = new Set(recommended.map(p => p.id));
+          const generalFiltered = general.filter(p => !recommendedIds.has(p.id));
+
+          setGeneralProducts(generalFiltered);
+          setCurrentRecommendedPage(1);
+          setCurrentGeneralPage(1);
       } catch (err) {
-        console.error("Failed to fetch products:", err);
+          console.error("Failed to fetch products:", err);
       } finally {
-        setLoading(false);
+          setLoading(false);
       }
     }
 
     fetchProducts();
-  }, []);
+  }, [selectedCategory, searchTerm]);
 
   const handleImageLoad = (id) => {
     setLoadedImages(prev => ({ ...prev, [id]: true }));
