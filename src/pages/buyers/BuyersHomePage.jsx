@@ -4,6 +4,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../../configs/auth';
 import { useNavigate } from 'react-router-dom';
 import { useOutletContext } from 'react-router';
+import { useCart } from '../../contexts/CartContext';
 
 function BuyersHomePage() {
   const { selectedCategory, searchTerm } = useOutletContext();
@@ -15,63 +16,80 @@ function BuyersHomePage() {
   const [currentRecommendedPage, setCurrentRecommendedPage] = useState(1);
   const [currentGeneralPage, setCurrentGeneralPage] = useState(1);
 
-  const [recommendedSearchTerm, setRecommendedSearchTerm] = useState("");
-
   const productsPerPage = 12;
   const recommendedPerPage = 4;
   const navigate = useNavigate();
 
-  const cartCategory = "";
+  const { cart } = useCart();
+  const cartCategories = [...new Set(cart.map(item => item.category))];
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); 
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
       try {
-          // Fetch recommended (category === "")
-          const cartQuery = query(collection(db, 'products'), where('category', '==', cartCategory));
-          const cartSnap = await getDocs(cartQuery);
-          const recommended = cartSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setRecommendedProducts(recommended);
+        // Recommended products from same category as items in cart
+        let recommended = [];
 
-          // Build general query based on selectedCategory
-          let generalQuery = collection(db, 'products');
-          if (selectedCategory && selectedCategory !== "all") {
-            generalQuery = query(generalQuery, where('category', '==', selectedCategory));
+        if (cartCategories.length > 0) {
+          for (const category of cartCategories) {
+            const q = query(collection(db, 'products'), where('category', '==', category));
+            const snap = await getDocs(q);
+            const items = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            recommended.push(...items);
           }
 
-          const generalSnap = await getDocs(generalQuery);
-          let general = generalSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          // Remove cart items from recommendation
+          const cartIds = new Set(cart.map(item => item.id));
+          recommended = recommended.filter(p => !cartIds.has(p.id));
+        }
 
-          // Apply search term filtering
-          if (searchTerm.trim() !== "") {
-            general = general.filter(product =>
-              product.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-          }
+        setRecommendedProducts(recommended);
 
-          // Remove recommended from general
-          const recommendedIds = new Set(recommended.map(p => p.id));
-          const generalFiltered = general.filter(p => !recommendedIds.has(p.id));
+        // General products (search + selectedCategory)
+        let generalQuery = collection(db, 'products');
+        if (selectedCategory && selectedCategory !== "all") {
+          generalQuery = query(generalQuery, where('category', '==', selectedCategory));
+        }
 
-          setGeneralProducts(generalFiltered);
-          setCurrentRecommendedPage(1);
-          setCurrentGeneralPage(1);
+        const generalSnap = await getDocs(generalQuery);
+        let general = generalSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (debouncedSearchTerm.trim() !== "") {
+          general = general.filter(product =>
+            product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+          );
+        }
+
+        const recommendedIds = new Set(recommended.map(p => p.id));
+        const generalFiltered = general.filter(p => !recommendedIds.has(p.id));
+        setGeneralProducts(generalFiltered);
+        setCurrentRecommendedPage(1);
+        setCurrentGeneralPage(1);
+
       } catch (err) {
-          console.error("Failed to fetch products:", err);
+        console.error("Failed to fetch products:", err);
       } finally {
-          setLoading(false);
+        setLoading(false);
       }
     }
 
     fetchProducts();
-  }, [selectedCategory, searchTerm]);
+  }, [selectedCategory, searchTerm, cart, debouncedSearchTerm]);
 
   const handleImageLoad = (id) => {
     setLoadedImages(prev => ({ ...prev, [id]: true }));
   };
 
   const filteredRecommended = recommendedProducts.filter(product =>
-    product.name.toLowerCase().includes(recommendedSearchTerm.toLowerCase())
+    product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   const totalRecommendedPages = Math.ceil(filteredRecommended.length / recommendedPerPage);
@@ -101,14 +119,6 @@ function BuyersHomePage() {
           {/* Recommended Section */}
           <div className="max-w-6xl mx-auto mb-10">
             <h3 className="text-xl font-semibold mb-4 text-gray-800">Recommended Based on Your Cart</h3>
-
-            <input
-              type="text"
-              value={recommendedSearchTerm}
-              onChange={(e) => setRecommendedSearchTerm(e.target.value)}
-              placeholder="Search recommended products"
-              className="mb-4 w-full px-4 py-2 border rounded text-sm text-gray-700"
-            />
 
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {currentRecommended.map(product => (
