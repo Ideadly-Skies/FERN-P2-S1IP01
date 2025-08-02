@@ -13,9 +13,9 @@ function AmazonFooter() {
       <div className="text-center  bg-[#37475A] py-3">
         <a
           onClick={scrollToTop}
-          className="text-white hover:text-orange-400 transition-colors duration-200 font-medium flex items-center justify-center gap-2 cursor-pointer"
+          className="group text-white hover:text-orange-400 transition-colors duration-200 font-medium flex items-center justify-center gap-2 cursor-pointer"
         >
-          <FaArrowUp className="text-white" />
+          <FaArrowUp className="text-white group-hover:text-orange-400 transition-colors duration-200" />
           Back to top
         </a>
       </div>
