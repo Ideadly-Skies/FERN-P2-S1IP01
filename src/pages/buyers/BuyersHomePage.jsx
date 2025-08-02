@@ -35,11 +35,19 @@ function BuyersHomePage() {
     async function fetchProducts() {
       setLoading(true);
       try {
-        // Recommended products from same category as items in cart
+        // Recommended products from cart categories, filtered by selectedCategory if set
         let recommended = [];
 
         if (cartCategories.length > 0) {
-          for (const category of cartCategories) {
+          // Determine which categories to query
+          const categoriesToQuery =
+            selectedCategory && selectedCategory !== "all"
+              ? cartCategories.includes(selectedCategory)
+                ? [selectedCategory] // restrict to selected category if it's in cart
+                : []                 // selectedCategory not relevant to cart → show nothing
+              : cartCategories;      // selectedCategory is "all" → show all cart categories
+
+          for (const category of categoriesToQuery) {
             const q = query(collection(db, 'products'), where('category', '==', category));
             const snap = await getDocs(q);
             const items = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -133,7 +141,7 @@ function BuyersHomePage() {
                   />
                   <h2 className="text-sm font-semibold">{product.name}</h2>
                   <p className="text-gray-600 text-xs mb-1 capitalize">{product.category}</p>
-                  <p className="text-[#B12704] font-bold text-sm">${(product.price / 100).toFixed(2)}</p>
+                  <p className="text-[#B12704] font-bold text-sm">${product.price.toLocaleString()}</p>
                 </div>
               ))}
             </div>
@@ -177,7 +185,7 @@ function BuyersHomePage() {
                   />
                   <h2 className="text-sm font-semibold">{product.name}</h2>
                   <p className="text-gray-600 text-xs mb-1 capitalize">{product.category}</p>
-                  <p className="text-[#B12704] font-bold text-sm">${(product.price / 100).toFixed(2)}</p>
+                  <p className="text-[#B12704] font-bold text-sm">${product.price.toLocaleString()}</p>
                 </div>
               ))}
             </div>

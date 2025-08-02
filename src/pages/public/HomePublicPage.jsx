@@ -84,7 +84,7 @@ function HomePublicPage() {
 
                 <h2 className="text-sm font-semibold">{product.name}</h2>
                 <p className="text-gray-600 text-xs mb-1 capitalize">{product.category}</p>
-                <p className="text-[#B12704] font-bold text-sm">${(product.price / 100).toFixed(2)}</p>
+                <p className="text-[#B12704] font-bold text-sm">${product.price.toLocaleString()}</p>
               </div>
             ))}
           </div>
