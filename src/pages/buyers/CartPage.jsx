@@ -1,10 +1,56 @@
 import React from "react";
 import { useCart } from "../../contexts/CartContext";
 import { formatUSD } from "../../utils/dollarFormatter";
+import axios from "axios";
 
 export default function CartPage() {
   const { cart, dispatch } = useCart();
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  const handleCheckout = async () => {
+    console.log("Cart payload:", cart);
+    console.log("Total:", total);
+
+    try {
+      // hardcoded approach
+      const AUD_TO_IDR = 10597.64;
+
+      const convertedItems = cart.map(({ id, name, price, quantity }) => ({
+        id,
+        name,
+        price: Math.round(price * AUD_TO_IDR),
+        quantity
+      }));
+
+      const convertedTotal = convertedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+      const response = await axios.post("https://fern-p2-s1ip01-server.onrender.com/create-transaction", {
+        items: convertedItems,
+        total: convertedTotal
+      });
+
+      const { token } = response.data;
+
+      window.snap.pay(token, {
+        onSuccess: function () {
+          dispatch({ type: "CLEAR_CART" });
+          alert("Payment successful! Thank you.");
+        },
+        onPending: function () {
+          console.log("Waiting for payment...");
+        },
+        onError: function () {
+          alert("Payment failed. Please try again.");
+        },
+        onClose: function () {
+          console.log("Payment popup closed without completing.");
+        }
+      });
+    } catch (err) {
+      console.error("Checkout error:", err.response?.data || err.message || err);
+      alert("Unable to process payment.");
+    }
+  };
 
   if (cart.length === 0)
     return <div className="text-center p-10">Your cart is empty.</div>;
@@ -60,7 +106,10 @@ export default function CartPage() {
           <span>Order Total:</span>
           <span>{formatUSD(total)}</span>
         </div>
-        <button className="mt-4 w-full bg-yellow-400 hover:bg-yellow-500 text-black py-2 rounded font-semibold">
+        <button
+          onClick={handleCheckout}
+          className="mt-4 w-full bg-yellow-400 hover:bg-yellow-500 text-black py-2 rounded font-semibold"
+        >
           Proceed to Checkout
         </button>
       </div>
