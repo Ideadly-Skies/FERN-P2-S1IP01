@@ -3,6 +3,8 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../../configs/auth';
 import { useOutletContext } from 'react-router';
 import { useNavigate } from 'react-router-dom';
+import Lottie from "lottie-react";
+import noDataAnimation from "../../assets/No-Data.json";
 
 function HomePublicPage() {
   const { selectedCategory, searchTerm } = useOutletContext();
@@ -60,6 +62,11 @@ function HomePublicPage() {
         <div className="flex justify-center items-center py-20">
           <div className="w-12 h-12 border-4 border-gray-400 border-t-transparent rounded-full animate-spin" />
         </div>
+      ) : currentProducts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <Lottie animationData={noDataAnimation} loop={true} className="w-80 h-80" />
+          <p className="text-gray-600 mt-4 text-lg font-medium">No products found</p>
+        </div>
       ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -84,7 +91,7 @@ function HomePublicPage() {
 
                 <h2 className="text-sm font-semibold">{product.name}</h2>
                 <p className="text-gray-600 text-xs mb-1 capitalize">{product.category}</p>
-                <p className="text-[#B12704] font-bold text-sm">${(product.price / 100).toFixed(2)}</p>
+                <p className="text-[#B12704] font-bold text-sm">${product.price.toLocaleString()}</p>
               </div>
             ))}
           </div>

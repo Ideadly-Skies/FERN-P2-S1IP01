@@ -10,6 +10,7 @@ import ProductDetail from './pages/public/ProductDetailPage';
 
 // buyers page
 import BuyersHomePage from './pages/buyers/BuyersHomePage';
+import CartPage from './pages/buyers/CartPage';
 
 // seed page
 import DummySeeder from './pages/seed/DummySeeder';
@@ -23,6 +24,7 @@ import { useContext, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from './contexts/AuthContext';
 import AuthContextProvider from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
 
 function BuyersProtectedPage({children}){
   const { user, role } = useContext(AuthContext);
@@ -73,7 +75,12 @@ const router = createBrowserRouter([
         index: true,
         path: "product/:slug",
         element: <ProductDetail/>
-      }, 
+      },
+      {
+        index: true,
+        path : "cart",
+        element: <CartPage/>
+      } 
     ],
   },
 
@@ -133,7 +140,9 @@ function App() {
   return (
     <>
       <AuthContextProvider>
-        <RouterProvider router={router} />
+        <CartProvider>
+          <RouterProvider router={router} />
+        </CartProvider>
       </AuthContextProvider>  
     </>
   )
