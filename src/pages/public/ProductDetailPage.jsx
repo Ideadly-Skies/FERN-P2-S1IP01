@@ -6,6 +6,7 @@ import { db } from '../../../configs/auth';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../contexts/CartContext';
 
 export default function ProductDetail() {
     const { user } = useContext(AuthContext);
@@ -13,6 +14,7 @@ export default function ProductDetail() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { dispatch } = useCart();
   
     useEffect(() => {
         async function fetchProduct() {
@@ -49,8 +51,15 @@ export default function ProductDetail() {
         <p className="text-gray-600 mb-4">Category: {product.category}</p>
         <p className="text-2xl font-semibold text-green-700 mb-4">${product.price.toFixed(2)}</p>
 
-        <button className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-2 rounded font-semibold" onClick={() => {user? navigate("/cart") : navigate("/auth/login")}}>
-          Add to Cart
+        <button
+            className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-2 rounded font-semibold"
+            onClick={() => {
+                if (!user) return navigate("/auth/login");
+                dispatch({ type: "ADD_ITEM", payload: product });
+                navigate("/cart");
+            }}
+        >
+        Add to Cart
         </button>
 
         <div className="mt-6">
