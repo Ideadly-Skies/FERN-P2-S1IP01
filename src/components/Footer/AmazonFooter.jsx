@@ -1,13 +1,21 @@
 import React from "react";
+import { FaArrowUp } from "react-icons/fa";
+
+// allow scroll to top behavior
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
 function AmazonFooter() {
   return (
     <>
+      {/* scroll to top behavior */}
       <div className="text-center  bg-[#37475A] py-3">
         <a
-          // href="#"
-          className="text-white hover:text-orange-400 transition-colors duration-200 font-medium"
+          onClick={scrollToTop}
+          className="text-white hover:text-orange-400 transition-colors duration-200 font-medium flex items-center justify-center gap-2 cursor-pointer"
         >
+          <FaArrowUp className="text-white" />
           Back to top
         </a>
       </div>
