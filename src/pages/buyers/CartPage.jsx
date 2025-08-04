@@ -6,6 +6,7 @@ import {
   removeFromCart,
   clearCart
 } from "../../redux/features/cart/cartSlice";
+
 import { formatUSD } from "../../utils/dollarFormatter";
 import axios from "axios";
 import Swal from "sweetalert2";
