@@ -55,7 +55,6 @@ function BuyersProtectedPage({children}){
 
   }, [user, role, navigate]);
 
-  console.log("you are protected"); 
   return children;
 }
 
@@ -173,7 +172,6 @@ function App() {
 
   useEffect(() => {
     if (user?.uid && initialized) {
-      console.log("cart after being initialized: ", cart)
       dispatch(persistCart({ uid: user.uid, cart }));
     }
   }, [cart, user?.uid, initialized, dispatch]);

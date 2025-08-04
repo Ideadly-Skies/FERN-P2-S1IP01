@@ -13,15 +13,13 @@ export default function AccountDropdown({ user, name, navigate }) {
 
     async function handlelogout() {
         try {
-            const result = await signOut(auth);
-            console.log(result);
-        
+            await signOut(auth);
             navigate("/public");
         } catch (error) {
             Swal.fire({
-                icon: 'error',
-                title: 'Logout Failed',
-                text: error.message || 'An error occurred during logout.',
+              icon: 'error',
+              title: 'Logout Failed',
+              text: error.message || 'An error occurred during logout.',
             });
         }
     }

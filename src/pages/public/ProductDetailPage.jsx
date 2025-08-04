@@ -8,6 +8,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from "react-redux";
 import { addToCart } from '../../redux/features/cart/cartSlice';
+import Swal from 'sweetalert2';
 
 export default function ProductDetail() {
     const { user } = useContext(AuthContext);
@@ -26,7 +27,12 @@ export default function ProductDetail() {
                 setProduct({ id: docSnap.id, ...docSnap.data() });
                 }
             } catch (err) {
-                console.error('Error fetching product:', err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Error fetching products!",
+                  text: err,
+                });
+
             } finally {
                 setLoading(false);
             }

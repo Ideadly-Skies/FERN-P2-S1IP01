@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../../configs/auth";
 import { query, where, getDocs } from "firebase/firestore";
+import Swal from "sweetalert2";
 
 function DummySeeder() {
   useEffect(() => {
@@ -24,7 +25,11 @@ function DummySeeder() {
         }        
       }
 
-      alert("Seeding complete!");
+      Swal.fire({
+        title: "Seeding Complete!",
+        text: "please return to the main home page",
+        icon: "success"
+      });
     }
 
     seed();

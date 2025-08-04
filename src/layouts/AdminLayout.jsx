@@ -17,8 +17,6 @@ function AdminLayout() {
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // console.log("Role:", role, "Name:", name);
-                 
                 // const uid = user.uid;
                 Swal.fire({
                     icon: "error",

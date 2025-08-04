@@ -29,11 +29,6 @@ export default function AuthContextProvider({ children }) {
             const data = docSnap.data();
             setRole(data.role);
             setName(data.name);
-            console.log("User Info:", {
-              uid: user.uid,
-              name: data.name,
-              role: data.role,
-            });
           }
           setLoadPage(false);
         })();

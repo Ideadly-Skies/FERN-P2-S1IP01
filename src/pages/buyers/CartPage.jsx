@@ -8,6 +8,7 @@ import {
 } from "../../redux/features/cart/cartSlice";
 import { formatUSD } from "../../utils/dollarFormatter";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function CartPage() {
   const { items: cart } = useSelector((state) => state.cart);
@@ -16,9 +17,7 @@ export default function CartPage() {
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleCheckout = async () => {
-    console.log("Cart payload:", cart);
-    console.log("Total:", total);
-
+     
     try {
       const AUD_TO_IDR = 10597.64;
 
@@ -41,21 +40,36 @@ export default function CartPage() {
       window.snap.pay(token, {
         onSuccess: function () {
           dispatch(clearCart());
-          alert("Payment successful! Thank you.");
+          Swal.fire({
+            text: "Payment successful! Thank you.",
+            icon: "success"
+          });
         },
         onPending: function () {
-          console.log("Waiting for payment...");
+          Swal.fire({
+            text: "Waiting for payment...",
+            icon: "warning"
+          });
         },
         onError: function () {
-          alert("Payment failed. Please try again.");
+          Swal.fire({
+            icon: "error",
+            text: "Payment failed. Please try again.",
+          });
         },
         onClose: function () {
-          console.log("Payment popup closed without completing.");
+          Swal.fire({
+            icon: "error",
+            text: "Payment popup closed without completing.",
+          });
         }
       });
     } catch (err) {
-      console.error("Checkout error:", err.response?.data || err.message || err);
-      alert("Unable to process payment.");
+      Swal.fire({
+        icon: "error",
+        title: "Checkout error!",
+        text: err.response?.data || err.message || err,
+      }); 
     }
   };
 

@@ -5,6 +5,7 @@ import { useOutletContext } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 import Lottie from "lottie-react";
 import noDataAnimation from "../../assets/No-Data.json";
+import Swal from 'sweetalert2';
 
 function HomePublicPage() {
   const { selectedCategory, searchTerm } = useOutletContext();
@@ -35,7 +36,11 @@ function HomePublicPage() {
         setLoadedImages({});
         setCurrentPage(1);
       } catch (err) {
-        console.error("Failed to fetch products:", err);
+          Swal.fire({
+            icon: "error",
+            title: "Failed to fetch products",
+            text: err,
+          });
       } finally {
         setLoading(false);
       }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../configs/auth";
+import Swal from "sweetalert2";
 
 export default function SearchBar({ onCategoryChange, onSearchChange }) {
     const [categories, setCategories] = useState([]);
@@ -16,14 +17,18 @@ export default function SearchBar({ onCategoryChange, onSearchChange }) {
 
     useEffect(() => {
         async function fetchCategories() {
-        try {
-            const querySnapshot = await getDocs(collection(db, "products"));
-            const products = querySnapshot.docs.map(doc => doc.data());
-            const uniqueCategories = [...new Set(products.map(p => p.category))];
-            setCategories(uniqueCategories);
-        } catch (err) {
-            console.error("Failed to fetch categories:", err);
-        }
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                const products = querySnapshot.docs.map(doc => doc.data());
+                const uniqueCategories = [...new Set(products.map(p => p.category))];
+                setCategories(uniqueCategories);
+            } catch (err) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Failed to fetch categories",
+                    text: err,
+                });
+            }
         }
 
         fetchCategories();

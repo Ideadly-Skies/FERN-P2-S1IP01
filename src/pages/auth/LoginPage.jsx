@@ -45,11 +45,11 @@ function LoginPage() {
             }
         } 
         catch (err) {
-            console.error("Error checking email in Firestore:", err);
-            Swal.fire({
-                text: "Error checking email. Please try again.",
-                icon: "error",
-            });
+          Swal.fire({
+            title: "Error checking email!",
+            text: err,
+            icon: "error",
+          });
         }
     }
 

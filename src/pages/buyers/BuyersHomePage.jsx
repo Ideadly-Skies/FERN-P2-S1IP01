@@ -5,6 +5,7 @@ import { db } from '../../../configs/auth';
 import { useNavigate } from 'react-router-dom';
 import { useOutletContext } from 'react-router';
 import { useSelector } from "react-redux";
+import Swal from 'sweetalert2';
 
 import Lottie from "lottie-react";
 import noDataAnimation from "../../assets/No-Data.json";
@@ -86,7 +87,12 @@ function BuyersHomePage() {
         setCurrentGeneralPage(1);
 
       } catch (err) {
-        console.error("Failed to fetch products:", err);
+        Swal.fire({
+          icon: "error",
+          title: "Failed to fetch products!",
+          text: err,
+        });
+
       } finally {
         setLoading(false);
       }
