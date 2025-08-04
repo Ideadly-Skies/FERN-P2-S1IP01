@@ -9,10 +9,17 @@ import {
 import { formatUSD } from "../../utils/dollarFormatter";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { persistCart } from "../../redux/features/cart/cartSlice";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext";
+
+import Lottie from "lottie-react";
+import noDataAnimation from "../../assets/No-Data.json"
 
 export default function CartPage() {
   const { items: cart } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
+  const { user } = useContext(AuthContext);
 
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -40,6 +47,8 @@ export default function CartPage() {
       window.snap.pay(token, {
         onSuccess: function () {
           dispatch(clearCart());
+          dispatch(persistCart({ uid: user.uid, cart: []}));
+
           Swal.fire({
             text: "Payment successful! Thank you.",
             icon: "success"
@@ -73,8 +82,14 @@ export default function CartPage() {
     }
   };
 
-  if (cart.length === 0)
-    return <div className="text-center p-10">Your cart is empty.</div>;
+  if (cart.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center my-10">
+        <Lottie animationData={noDataAnimation} loop={true} className="w-72 h-72" />
+        <p className="text-gray-600 mt-2 text-base">No recommended products found</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-6 grid md:grid-cols-3 gap-6">
