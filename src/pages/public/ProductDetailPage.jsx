@@ -6,7 +6,8 @@ import { db } from '../../../configs/auth';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../../contexts/CartContext';
+import { useDispatch } from "react-redux";
+import { addToCart } from '../../redux/features/cart/cartSlice';
 
 export default function ProductDetail() {
     const { user } = useContext(AuthContext);
@@ -14,7 +15,7 @@ export default function ProductDetail() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const { dispatch } = useCart();
+    const dispatch = useDispatch();
   
     useEffect(() => {
         async function fetchProduct() {
@@ -55,7 +56,7 @@ export default function ProductDetail() {
             className="bg-yellow-400 hover:bg-yellow-500 text-black px-6 py-2 rounded font-semibold"
             onClick={() => {
                 if (!user) return navigate("/auth/login");
-                dispatch({ type: "ADD_ITEM", payload: product });
+                dispatch(addToCart(product));
                 navigate("/cart");
             }}
         >

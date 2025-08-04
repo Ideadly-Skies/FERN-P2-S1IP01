@@ -1,10 +1,18 @@
 import React from "react";
-import { useCart } from "../../contexts/CartContext";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  incrementQuantity,
+  decrementQuantity,
+  removeFromCart,
+  clearCart
+} from "../../redux/features/cart/cartSlice";
 import { formatUSD } from "../../utils/dollarFormatter";
 import axios from "axios";
 
 export default function CartPage() {
-  const { cart, dispatch } = useCart();
+  const { items: cart } = useSelector((state) => state.cart);
+  const dispatch = useDispatch();
+
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   const handleCheckout = async () => {
@@ -12,7 +20,6 @@ export default function CartPage() {
     console.log("Total:", total);
 
     try {
-      // hardcoded approach
       const AUD_TO_IDR = 10597.64;
 
       const convertedItems = cart.map(({ id, name, price, quantity }) => ({
@@ -33,7 +40,7 @@ export default function CartPage() {
 
       window.snap.pay(token, {
         onSuccess: function () {
-          dispatch({ type: "CLEAR_CART" });
+          dispatch(clearCart());
           alert("Payment successful! Thank you.");
         },
         onPending: function () {
@@ -69,14 +76,14 @@ export default function CartPage() {
                 <span className="text-sm text-gray-500">Qty:</span>
                 <div className="flex items-center border rounded overflow-hidden">
                   <button
-                    onClick={() => dispatch({ type: "DECREMENT", payload: item.id })}
+                    onClick={() => dispatch(decrementQuantity(item.id))}
                     className="px-2 py-1 text-sm bg-gray-100 hover:bg-gray-200"
                   >
                     -
                   </button>
                   <span className="px-3 py-1 bg-white text-sm">{item.quantity}</span>
                   <button
-                    onClick={() => dispatch({ type: "INCREMENT", payload: item.id })}
+                    onClick={() => dispatch(incrementQuantity(item.id))}
                     className="px-2 py-1 text-sm bg-gray-100 hover:bg-gray-200"
                   >
                     +
@@ -85,7 +92,7 @@ export default function CartPage() {
               </div>
               <p className="text-green-700 font-bold mt-2">{formatUSD(item.price)}</p>
               <button
-                onClick={() => dispatch({ type: "REMOVE_ITEM", payload: item.id })}
+                onClick={() => dispatch(removeFromCart(item.id))}
                 className="text-red-500 text-sm mt-2 hover:underline"
               >
                 Remove

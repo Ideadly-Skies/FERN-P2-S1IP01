@@ -24,7 +24,10 @@ import { useContext, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from './contexts/AuthContext';
 import AuthContextProvider from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
+
+// cart updating
+import { useDispatch, useSelector } from "react-redux";
+import { loadCart, persistCart } from "./redux/features/cart/cartSlice";
 
 function BuyersProtectedPage({children}){
   const { user, role } = useContext(AuthContext);
@@ -135,14 +138,51 @@ const router = createBrowserRouter([
   },
 ]);
 
+function CartSync() {
+  const { items: cart, initialized } = useSelector((state) => state.cart);
+  const { user } = useContext(AuthContext);
+  const dispatch = useDispatch();
+
+  // Only load cart when user logs in and it's not yet initialized
+  useEffect(() => {
+    if (user?.uid && !initialized) {
+      dispatch(loadCart(user.uid));
+    }
+  }, [user?.uid, initialized, dispatch]);
+
+  // Persist to Firestore only after initial load
+  useEffect(() => {
+    if (user?.uid && initialized) {
+      dispatch(persistCart({ uid: user.uid, cart }));
+    }
+  }, [cart, user?.uid, initialized, dispatch]);
+
+  return null;
+}
+
 function App() {
+  const { user } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const { items: cart, initialized } = useSelector((state) => state.cart);
+
+  useEffect(() => {
+    if (user?.uid) {
+      dispatch(loadCart(user.uid));
+    }
+  }, [user?.uid, dispatch]);
+
+  useEffect(() => {
+    if (user?.uid && initialized) {
+      console.log("cart after being initialized: ", cart)
+      dispatch(persistCart({ uid: user.uid, cart }));
+    }
+  }, [cart, user?.uid, initialized, dispatch]);
 
   return (
     <>
       <AuthContextProvider>
-        <CartProvider>
-          <RouterProvider router={router} />
-        </CartProvider>
+        <CartSync />
+        <RouterProvider router={router} />
       </AuthContextProvider>  
     </>
   )

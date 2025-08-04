@@ -4,7 +4,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../../configs/auth';
 import { useNavigate } from 'react-router-dom';
 import { useOutletContext } from 'react-router';
-import { useCart } from '../../contexts/CartContext';
+import { useSelector } from "react-redux";
 
 import Lottie from "lottie-react";
 import noDataAnimation from "../../assets/No-Data.json";
@@ -23,7 +23,7 @@ function BuyersHomePage() {
   const recommendedPerPage = 4;
   const navigate = useNavigate();
 
-  const { cart } = useCart();
+  const { items: cart } = useSelector((state) => state.cart);
   const cartCategories = [...new Set(cart.map(item => item.category))];
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
